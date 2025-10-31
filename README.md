@@ -151,6 +151,14 @@ to discuss what you would like to change.
 <img width="1890" height="895" alt="image" src="https://github.com/user-attachments/assets/dae5c7ca-fe38-437b-900b-9b8328bbb0a0" />
 
 
+<img width="1917" height="962" alt="Screenshot 2025-10-31 134843" src="https://github.com/user-attachments/assets/751dd669-e9c9-4b4f-a94b-ed6a224bb6c5" />
+
+
+<img width="1777" height="899" alt="Screenshot 2025-10-21 213327" src="https://github.com/user-attachments/assets/137a3522-3f48-4af6-8d59-409995258fb5" />
+
+
+
+
 
 
 ## License
