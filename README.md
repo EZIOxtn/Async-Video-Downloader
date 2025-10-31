@@ -52,7 +52,7 @@ The script auto-installs dependencies if they’re missing:
 ```bash
 python3 app.py #or py app.py
 ```
-###3️⃣ Open the dashboard
+### 3️⃣ Open the dashboard
 Once started, open your browser at:
 
 ```
