@@ -1,0 +1,8 @@
+{
+  "download_folder": "./downloads",
+  "max_concurrent": 3,
+  "max_retries": 10,
+  "download_timeout": 60,
+  "chunk_size": 64,
+  "auto_dark_mode": false
+}
