@@ -5,6 +5,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Async Video Downloader</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+
 <style>
 body { 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -719,13 +721,13 @@ body.dark-mode #top-controls button {
 </head>
 <body>
 <h1 class="animated-title" id="mainTitle">Async Video Downloader</h1>
-
+<!-- Top-right buttons -->
 <div id="top-controls">
     <button id="darkModeToggle" title="Toggle Dark Mode">🌙</button>
     <button id="settingsButton" title="Settings">⚙️</button>
   </div>
   
- 
+  <!-- Professional Settings Dashboard -->
   <div id="settingsWindow" class="hidden">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h3 style="margin: 0; color: #333; font-size: 1.4em;">⚙️ Settings Dashboard</h3>
@@ -778,6 +780,7 @@ body.dark-mode #top-controls button {
     <div id="settingsStatus" style="margin-top: 15px; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; display: none;"></div>
   </div>
   
+<!-- Circular Statistics -->
 <div style="display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap;">
 
 
@@ -819,7 +822,7 @@ body.dark-mode #top-controls button {
 </form>
 
 <style>
-
+/* Enhanced Input Styles */
 #url:focus {
   outline: none;
   border-color: #2196f3;
@@ -867,7 +870,7 @@ body.dark-mode #top-controls button {
   opacity: 0.6;
 }
 
-
+/* Mobile Responsive */
 @media (max-width: 768px) {
   #f {
     flex-direction: column;
@@ -899,7 +902,7 @@ body.dark-mode #top-controls button {
   }
 }
 
-
+/* 🌙 Dark Mode Styles (override inline styles) */
 body.dark-mode #dark-mode {
   background: #121212 !important;
   border: 2px solid #1e1e1e !important;
@@ -980,10 +983,9 @@ body.dark-mode #uploadBtn:disabled {
   z-index: 9999;
   white-space: nowrap;
 }
-
 .toast {
-  z-index: 20;
-  position: absolute;
+  z-index: 9999;
+  position: fixed;
   top: 25px;
   right: 30px;
   border-radius: 12px;
@@ -993,10 +995,12 @@ body.dark-mode #uploadBtn:disabled {
   overflow: hidden;
   transform: translateX(calc(100% + 30px));
   transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.35);
+  display: none; /* hide by default */
 }
 
 .toast.active {
   transform: translateX(0%);
+  display: flex; /* show when active */
 }
 
 .toast .toast-content {
@@ -1052,7 +1056,6 @@ body.dark-mode #uploadBtn:disabled {
   left: 0;
   height: 3px;
   width: 100%;
-
 }
 
 .toast .progress:before {
@@ -1064,6 +1067,7 @@ body.dark-mode #uploadBtn:disabled {
   width: 100%;
   background-color: #2770ff;
 }
+
 
 .progress.active:before {
   animation: progress 5s linear forwards;
@@ -1168,6 +1172,7 @@ button:hover {
   </div>
   <i class="fa-solid fa-xmark close"></i>
 
+  <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
   <div class="progress "></div>
 </div>
   <button id="getsize" class="btn btn-sm btn-danger" style="margin-left: 10px;">size</button>
@@ -1182,53 +1187,83 @@ button:hover {
 <script>
 
 document.getElementById('getsize').addEventListener("click", async () => {
+  
+  let rx  = null;
+  let dirpathx = "./downloads";
+
+ try {
+  const res = await fetch("/api/settings");
+  const data = await res.json();
+
+  if (data?.download_folder) {
+    dirpathx = data.download_folder;
+  }
+} catch (err) {
+  console.error("Failed to load settings:", err);
+}
+  console.log(rx);
+if (rx === null){dirpathx= "./downloads";} 
   try {
   const rss = await fetch("/api/getsize",
   {method: "POST",
-   body: JSON.stringify({dirpath: localStorage.getItem("stDir")})
+   body: JSON.stringify({dirpath: dirpathx})
 
 
   }
   
   );
-  if(rss.ok){
-    const sizedata = await rss.json();
-    //showToast("total " +localStorage.getItem("stDir")+" folder size is  : " +  sizedata.size,2000,"center",btt= "100px");
-    const button = document.getElementById("getsize"),
-  toast = document.querySelector(".toast");
-  let textt = document.getElementById("textmsg");
-(closeIcon = document.querySelector(".close")),
-  (progress = document.querySelector(".progress"));
+  if (rss.ok) {
+  const sizedata = await rss.json();
 
-let timer1, timer2;
+  const button = document.getElementById("getsize");
+  const toast = document.querySelector(".toast");
+  const textt = document.getElementById("textmsg");
+  const closeIcon = document.querySelector(".close");
+  const progress = document.querySelector(".progress");
 
-button.addEventListener("click", () => {
-  textt.innerHTML = "total " +localStorage.getItem("stDir")+" folder size is  : " +  sizedata.size;
-  toast.classList.add("active");
-  progress.classList.add("active");
+  let timer1, timer2;
 
-  timer1 = setTimeout(() => {
+  // Prevent double event listeners
+  button.replaceWith(button.cloneNode(true));
+  const newButton = document.getElementById("getsize");
+
+  newButton.addEventListener("click", () => {
+    textt.innerHTML =
+      "Total " +
+      dirpathx +
+      " folder size is: " +
+      sizedata.size;
+
+    toast.style.display = "flex"; // make visible
+    toast.classList.add("active");
+    progress.classList.add("active");
+
+    // hide after 5s
+    timer1 = setTimeout(() => {
+      toast.classList.remove("active");
+      // wait for animation to finish, then hide
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 500);
+    }, 5000);
+
+    // remove progress class slightly after
+    timer2 = setTimeout(() => {
+      progress.classList.remove("active");
+    }, 5300);
+  });
+
+  closeIcon.addEventListener("click", () => {
     toast.classList.remove("active");
-  }, 5000); 
+    setTimeout(() => {
+      toast.style.display = "none";
+      progress.classList.remove("active");
+    }, 300);
+    clearTimeout(timer1);
+    clearTimeout(timer2);
+  });
+}
 
-  timer2 = setTimeout(() => {
-    progress.classList.remove("active");
-  }, 5300);
-});
-
-closeIcon.addEventListener("click", () => {
-  toast.classList.remove("active");
-
-  setTimeout(() => {
-    progress.classList.remove("active");
-  }, 300);
-
-  clearTimeout(timer1);
-  clearTimeout(timer2);
-});
-
-  }
-  
   }catch (err) {
 console.error(err);
   }
@@ -1300,7 +1335,7 @@ function attachTooltip(element, text) {
   });
 }
 
-
+// Apply tooltip to button
 attachTooltip(document.getElementById("resetDoneBtn"), "Click to clear all completed downloads");
 
     // --- Dark Mode + Settings ---
@@ -1337,7 +1372,7 @@ closeSettings.addEventListener('click', () => {
   settingsWindow.classList.add('hidden');
 });
 
-
+// Load settings from server
 async function loadSettings() {
   try {
     const response = await fetch('/api/settings');
@@ -1355,6 +1390,7 @@ async function loadSettings() {
   }
 }
 
+// Save settings to server
 saveSettings.addEventListener('click', async () => {
   const settings = {
     download_folder: downloadFolder.value,
@@ -1378,7 +1414,7 @@ saveSettings.addEventListener('click', async () => {
     const result = await response.json();
     if (result.success) {
       showSettingsStatus('Settings saved successfully!', 'success');
-    
+      // Apply settings immediately
       applySettings(settings);
     } else {
       showSettingsStatus('Failed to save settings: ' + result.error, 'error');
@@ -1389,6 +1425,7 @@ saveSettings.addEventListener('click', async () => {
   }
 });
 
+// Reset settings to defaults
 resetSettings.addEventListener('click', () => {
   downloadFolder.value = './downloads';
   maxConcurrent.value = 2;
@@ -1399,6 +1436,7 @@ resetSettings.addEventListener('click', () => {
   showSettingsStatus('Settings reset to defaults', 'info');
 });
 
+// Show status message
 function showSettingsStatus(message, type) {
   settingsStatus.textContent = message;
   settingsStatus.className = '';
@@ -1423,9 +1461,9 @@ function showSettingsStatus(message, type) {
   }, 3000);
 }
 
-
+// Apply settings to the application
 function applySettings(settings) {
-  
+  // Update dark mode if auto dark mode is enabled
   if (settings.auto_dark_mode) {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (prefersDark) {
@@ -1436,13 +1474,13 @@ function applySettings(settings) {
   }
 }
 
-
+// Update dark mode icon
 function updateDarkModeIcon() {
   const isDark = document.body.classList.contains('dark-mode');
   darkModeToggle.textContent = isDark ? '☀️' : '🌙';
 }
 
-
+// Remember user's dark mode preference
 document.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
@@ -1450,7 +1488,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateDarkModeIcon();
 });
 
-
+// Listen for system dark mode changes
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
   if (autoDarkMode && autoDarkMode.checked) {
     if (e.matches) {
@@ -1462,7 +1500,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
   }
 });
 
-
+// Character-by-character animation for the main title
 function animateTitle() {
   const titleElement = document.getElementById('mainTitle');
   if (!titleElement) return;
@@ -1474,13 +1512,13 @@ function animateTitle() {
     const char = text[i];
     const span = document.createElement('span');
     span.className = 'char';
-    span.textContent = char === ' ' ? '\u00A0' : char; 
+    span.textContent = char === ' ' ? '\u00A0' : char; // Use non-breaking space for spaces
     span.style.setProperty('--char-delay', `${i * 0.1}s`);
     titleElement.appendChild(span);
   }
 }
 
-
+// Initialize title animation when page loads
 document.addEventListener('DOMContentLoaded', function() {
   animateTitle();
 });
@@ -1508,7 +1546,7 @@ function updateCounters(data) {
     else if (task.status === 'error') counts.error++;
   });
   
-  
+  // Update rectangular counters (if they exist)
   const completedCountEl = document.getElementById('completed-count');
   const inProgressCountEl = document.getElementById('in-progress-count');
   const pendingCountEl = document.getElementById('pending-count');
@@ -1519,7 +1557,7 @@ function updateCounters(data) {
   if (pendingCountEl) pendingCountEl.textContent = counts.pending;
   if (errorCountEl) errorCountEl.textContent = counts.error;
   
-  
+  // Update circular counters (if they exist)
   const pendingCircleEl = document.getElementById('pending-circle-count');
   const downloadingCircleEl = document.getElementById('downloading-circle-count');
   const errorCircleEl = document.getElementById('error-circle-count');
@@ -1530,10 +1568,10 @@ function updateCounters(data) {
   if (errorCircleEl) errorCircleEl.textContent = counts.error;
   if (doneCircleEl) doneCircleEl.textContent = counts.completed;
   
-  
+  // Calculate total for percentage calculations
   const total = counts.pending + counts.downloading + counts.error + counts.completed;
   
-  
+  // Update circular progress angles
   if (total > 0) {
     const pendingAngle = (counts.pending / total) * 360;
     const downloadingAngle = (counts.downloading / total) * 360;
@@ -1545,18 +1583,18 @@ function updateCounters(data) {
     document.documentElement.style.setProperty('--error-angle', `${errorAngle}deg`);
     document.documentElement.style.setProperty('--done-angle', `${doneAngle}deg`);
   } else {
-    
+    // Reset to 0 if no tasks
     document.documentElement.style.setProperty('--pending-angle', '0deg');
     document.documentElement.style.setProperty('--downloading-angle', '0deg');
     document.documentElement.style.setProperty('--error-angle', '0deg');
     document.documentElement.style.setProperty('--done-angle', '0deg');
   }
 }
-
+// Keep track of existing task elements
 const taskElements = new Map();
 let renderPending = false;
 
-
+// Smooth progress transitions
 const style = document.createElement('style');
 style.textContent = `
 .bar .fill {
@@ -1571,7 +1609,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-
+// Schedule render updates to prevent flicker
 function scheduleRender(data) {
   if (renderPending) return;
   renderPending = true;
@@ -1588,10 +1626,10 @@ function renderTasks(data) {
     return;
   }
 
-  
+  // Update counters
   updateCounters(data);
 
-  
+  // Sort tasks: downloading/retrying first, then by status
   const arr = Object.values(data).sort((a, b) => {
     const aActive = a.status === 'downloading' || a.status.includes('retrying');
     const bActive = b.status === 'downloading' || b.status.includes('retrying');
@@ -1601,7 +1639,7 @@ function renderTasks(data) {
     return (priority[a.status] || 5) - (priority[b.status] || 5);
   });
 
-  
+  // Remove deleted tasks
   const currentTaskIds = new Set(arr.map(t => t.id));
   for (const [taskId, el] of taskElements) {
     if (!currentTaskIds.has(taskId)) {
@@ -1610,14 +1648,14 @@ function renderTasks(data) {
     }
   }
 
-  
+  // Reuse existing nodes or create new ones
   const fragment = document.createDocumentFragment();
 
   for (const t of arr) {
     let el = taskElements.get(t.id);
 
     if (!el) {
-      
+      // --- CREATE NEW ELEMENT ---
       el = document.createElement('div');
       el.className = `task ${t.status}`;
       el.setAttribute('data-task-id', t.id);
@@ -1668,9 +1706,9 @@ function renderTasks(data) {
       taskElements.set(t.id, el);
       container.appendChild(el);
 
-      
+      //fragment.appendChild(el);
     } else {
-      
+      // --- UPDATE EXISTING ELEMENT ---
       updateTaskElement(el, t);
       
     }
@@ -1678,7 +1716,7 @@ function renderTasks(data) {
     //fragment.appendChild(el);
   }
 
-  
+  // Only re-append (no destruction)
   
   
 }
@@ -1689,7 +1727,7 @@ function updateTaskElement(el, t) {
   const errorBox = el.querySelector('.error-message');
   const progressInfo = el.querySelector('.progress-info strong');
 
-  
+  // Update progress bar width
   if (fill) {
     fill.style.width = `${t.progress || 0}%`;
     fill.style.background =
@@ -1702,18 +1740,18 @@ function updateTaskElement(el, t) {
         : '#ff9800';
   }
 
-  
+  // Update percentage text
   if (progressInfo) {
     progressInfo.textContent = `${t.progress ?? '?'}%`;
   }
 
-  
+  // Update status badge if changed
   if (statusBadge && statusBadge.textContent !== t.status) {
     statusBadge.textContent = t.status;
     statusBadge.className = `status-badge ${t.status}`;
   }
 
-  
+  // Show error message if exists
   if (errorBox) {
     if (t.status === 'error' && t.error_message) {
       errorBox.style.display = 'block';
@@ -1726,18 +1764,18 @@ function updateTaskElement(el, t) {
 
 
 function updateTaskElement(el, t) {
-  
+  // Update progress bar width smoothly
   const fill = el.querySelector('.fill');
   if (fill) {
     const currentWidth = fill.style.width;
     const newWidth = `${t.progress || 0}%`;
     
-    
+    // Only update if width actually changed to prevent unnecessary repaints
     if (currentWidth !== newWidth) {
       fill.style.width = newWidth;
     }
     
-    
+    // Update background color if status changed
     const newBackground = t.status === 'completed' ? '#4caf50' :
       t.status === 'downloading' || t.status.includes('retrying') ? '#2196f3' :
       t.status === 'error' ? '#f44336' : '#ff9800';
@@ -1747,7 +1785,7 @@ function updateTaskElement(el, t) {
     }
   }
 
-  
+  // Update status badge without resetting animation
   const badge = el.querySelector('.status-badge');
   if (badge && badge.textContent !== t.status) {
     badge.textContent = t.status;
@@ -1758,7 +1796,7 @@ function updateTaskElement(el, t) {
     badge.className = `status-badge ${newStatusClass}`;
   }
 
-  
+  // Update progress text efficiently
   const info = el.querySelector('.progress-info');
   if (info) {
     const progressText = `${t.progress !== null && t.progress !== undefined ? t.progress + '%' : '?'}`;
@@ -1766,13 +1804,13 @@ function updateTaskElement(el, t) {
     const totalText = formatBytes(t.total_bytes);
     const newContent = `<strong>${progressText}</strong> • Downloaded: <strong>${downloadedText}</strong> • Total: <strong>${totalText}</strong>`;
     
-    
+    // Only update if content actually changed
     if (info.innerHTML !== newContent) {
       info.innerHTML = newContent;
     }
   }
 
-  
+  // Update filename if it changed
   const filenameEl = el.querySelector('.task-filename');
   if (filenameEl) {
     const newFilename = t.filename ? t.filename.split('/').pop() : '(pending)';
@@ -1781,7 +1819,7 @@ function updateTaskElement(el, t) {
     }
   }
 
-  
+  // Update error message visibility efficiently
   const errorBox = el.querySelector('.error-message');
   if (errorBox) {
     if (t.error) {
@@ -1799,14 +1837,14 @@ function updateTaskElement(el, t) {
     }
   }
 
-  
+  // Update task class for styling
   const newTaskClass = `task ${t.status}`;
   if (el.className !== newTaskClass) {
     el.className = newTaskClass;
   }
 }
 
-
+// Enhanced File upload functionality with drag & drop
 document.addEventListener('DOMContentLoaded', function() {
   const uploadBtn = document.getElementById('uploadBtn');
   const fileInput = document.getElementById('fileInput');
@@ -1820,7 +1858,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
   
-  
+  // Format file size
   function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -1829,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
   
-  
+  // Update file info display
   function updateFileInfo(file) {
     if (file) {
       fileName.textContent = file.name;
@@ -1837,7 +1875,7 @@ document.addEventListener('DOMContentLoaded', function() {
       fileInfo.style.display = 'block';
       uploadBtn.disabled = false;
       
-      
+      // Update drop zone text
       fileDropZone.innerHTML = `
         <div style="font-size: 48px; margin-bottom: 15px;">✅</div>
         <div style="font-size: 18px; font-weight: 600; color: #4caf50; margin-bottom: 8px;">File Selected!</div>
@@ -1848,7 +1886,7 @@ document.addEventListener('DOMContentLoaded', function() {
       fileInfo.style.display = 'none';
       uploadBtn.disabled = true;
       
-      
+      // Reset drop zone text
       fileDropZone.innerHTML = `
         <div style="font-size: 48px; margin-bottom: 15px;">📁</div>
         <div style="font-size: 18px; font-weight: 600; color: #2196f3; margin-bottom: 8px;">Click to select or drag & drop</div>
@@ -1858,7 +1896,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  
+  // Handle file selection
   function handleFile(file) {
     if (!file) return;
     
@@ -1870,12 +1908,12 @@ document.addEventListener('DOMContentLoaded', function() {
     updateFileInfo(file);
   }
   
-  
+  // File input change handler
   fileInput.addEventListener('change', function() {
     handleFile(fileInput.files[0]);
   });
   
-  
+  // Drag and drop handlers
   fileDropZone.addEventListener('dragover', function(e) {
     e.preventDefault();
     fileDropZone.classList.add('dragover');
@@ -1897,12 +1935,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  
+  // Click handler for drop zone
   fileDropZone.addEventListener('click', function() {
     fileInput.click();
   });
   
-  
+  // Upload button handler
   uploadBtn.addEventListener('click', async function(e) {
     e.preventDefault();
     
@@ -1918,7 +1956,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const text = await file.text();
       console.log('File content length:', text.length);
       
-      
+      // Parse URLs from text file
       const urls = text.split('\n')
         .map(line => line.trim())
         .filter(line => line.length > 0 && (line.startsWith('http://') || line.startsWith('https://')));
@@ -1931,14 +1969,14 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      
+      // Show loading state
       const originalText = uploadBtn.innerHTML;
       uploadBtn.innerHTML = '⏳ Processing...';
       uploadBtn.disabled = true;
       
       console.log('Sending URLs array to server:', urls);
       
-      
+      // Send URLs array to bulk enqueue endpoint
       const response = await fetch('/bulk_enqueue', {
         method: 'POST',
         headers: {
@@ -1962,17 +2000,17 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error('Error processing file:', error);
       alert('❌ Error reading file: ' + error.message);
     } finally {
-      
+      // Reset button state
       uploadBtn.innerHTML = "upload more";
       uploadBtn.disabled = false;
     }
   });
   
-  
+  // Initialize with no file selected
   updateFileInfo(null);
 });
 
-
+// Add URL functionality
 document.addEventListener('DOMContentLoaded', function() {
   const addBtn = document.getElementById('add');
   const urlInput = document.getElementById('url');
@@ -1993,7 +2031,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      
+      // Show loading state
       const originalText = addBtn.innerHTML;
       addBtn.innerHTML = '⏳ Adding...';
       addBtn.disabled = true;
@@ -2019,13 +2057,13 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Error enqueuing URL:', error);
         alert('Error adding URL: ' + error.message);
       } finally {
-        
+        // Reset button state
         addBtn.innerHTML = originalText;
         addBtn.disabled = false;
       }
     });
     
-    
+    // Allow Enter key to submit
     urlInput.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         addBtn.click();
@@ -2038,7 +2076,7 @@ const evtSource = new EventSource('/status');
 evtSource.onmessage = function(event) {
   try {
     const data = JSON.parse(event.data);
-    renderTasks(data); 
+    renderTasks(data); // your existing UI update function
   } catch (e) {
     console.error("Stream parse error:", e);
   }
