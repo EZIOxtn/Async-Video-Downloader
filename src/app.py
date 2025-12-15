@@ -416,11 +416,20 @@ def cleanup_done_tasks():
         "message": f"Removed {len(done_keys)} completed task(s)"
     })
 
+
 if __name__=="__main__":
     
     os.system('cls' if os.name == 'nt' else 'clear')
 
     print("✅ All dependencies are installed and ready!")
-    print("Starting Flask server...")
-    
-    app.run(debug=True, threaded=True)
+    print("Starting Flask server on port ", PORT)
+    url = f"http://127.0.0.1:{PORT}"
+
+ 
+    if os.name == "nt": 
+        os.system(f'start {url}')
+    else:  
+        os.system(f'xdg-open {url} >/dev/null 2>&1 &')
+
+    app.run(debug=True, threaded=True , port=PORT)
+
