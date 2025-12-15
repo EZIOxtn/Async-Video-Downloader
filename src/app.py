@@ -39,6 +39,7 @@ from flask_cors import CORS
 # ---------- Config ----------
 OUTPUT_DIR = Path("./downloads")
 OUTPUT_DIR.mkdir(exist_ok=True)
+PORT = 3010
 # At the top, after OUTPUT_DIR.mkdir(exist_ok=True)
 existing_files = list(OUTPUT_DIR.glob("*"))
 existing_numbers = []
@@ -432,4 +433,5 @@ if __name__=="__main__":
         os.system(f'xdg-open {url} >/dev/null 2>&1 &')
 
     app.run(debug=True, threaded=True , port=PORT)
+
 
