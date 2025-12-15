@@ -45,7 +45,7 @@ Browser UI aiohttp + asyncio
 ### 1️⃣ Clone the repository
 ```bash
 git clone https://github.com/yourusername/async-video-downloader.git
-cd async-video-downloader
+cd async-video-downloader/src
 ```
 ### 2️⃣ Run the script
 The script auto-installs dependencies if they’re missing:
@@ -56,7 +56,7 @@ python3 app.py #or py app.py
 Once started, open your browser at:
 
 ```
-http://127.0.0.1:5000
+http://127.0.0.1:3010
 ```
 
 ## 🧠 Usage
