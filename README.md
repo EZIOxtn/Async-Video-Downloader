@@ -8,6 +8,8 @@
 ![AsyncIO](https://img.shields.io/badge/Async-Enabled-green)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 ![Flask](https://img.shields.io/badge/Flask-API-orange)
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=EZIOxtn.Async-Video-Downloader)
+
 
 
 ## 🚀 Overview
